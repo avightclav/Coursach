@@ -28,7 +28,7 @@ double work[27];
 int iwork[30];
 
 //Тупо лайн
-char line[] = "--------------------------------------------------";
+char line[] = "--------------------------------------------------\n";
 
 //Параметры узла
 double awaitedX;
@@ -66,10 +66,10 @@ void setUp() {
 
 
 //Установка текущего узла таблцы
-void setUpNode(double sAwaitedX, double sRightX, double sRightK) {
+void setUpNode(double sAwaitedX) {
+    rightX = 10;
+    rightK = 0;
     awaitedX = sAwaitedX;
-    rightX = sRightX;
-    rightK = sRightK;
 
 
 }
@@ -91,8 +91,9 @@ void callRKF45() {
 
     }
     printf(line);
-    printf("\n");
+    printf("K = \n");
     printf("%.10f\n", rightK);
+    printf("X = \n");
     printf("%.10f\n", rightX);
 
 }
@@ -106,48 +107,48 @@ int main() {
 
 
     current_tOut = 0.0;
-    setUpNode(0.0, 10, 0);
+    setUpNode(0.0);
     callRKF45();
     printf("errors = \n");
     printf("%.10f\n", errors);
 
 
     current_tOut = 0.4;
-    setUpNode(0.303, 10, 0);
+    setUpNode(0.303);
     callRKF45();
     printf("errors = \n");
     printf("%.10f\n", errors);
 
 
     current_tOut = 0.8;
-    setUpNode(-0.465, 10, 0);
+    setUpNode(-0.465);
     callRKF45();
     printf("errors = \n");
     printf("%.10f\n", errors);
 
     current_tOut = 1.2;
-    setUpNode(0.592, 10, 0);
+    setUpNode(0.592);
     callRKF45();
     printf("errors = \n");
     printf("%.10f\n", errors);
 
 
     current_tOut = 1.6;
-    setUpNode(-0.409, 10, 0);
+    setUpNode(-0.409);
     callRKF45();
     printf("errors = \n");
     printf("%.10f\n", errors);
 
 
     current_tOut = 2.0;
-    setUpNode(0.164, 10, 0);
+    setUpNode(0.164);
     callRKF45();
     printf("errors = \n");
     printf("%.10f\n", errors);
 
 
     current_tOut = 2.4;
-    setUpNode(0.180, 10, 0);
+    setUpNode(0.180);
     callRKF45();
     printf("errors = \n");
     printf("%.10f\n", errors);
