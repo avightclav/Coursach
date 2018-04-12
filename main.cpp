@@ -23,7 +23,7 @@ double y[4];// y[0] = y, y[1] = y', y[2] = z, y[3] = z'
 double dy[4];//Дифференциалы
 
 
-//Параметры для QUANC8
+//Параметры QUANC8
 const int down = 0, up = 1;
 const double abserr = 1.0e-12, relerr = 0;
 double errest, flag;
@@ -35,13 +35,12 @@ int iflag = 1, n = 4;
 double work[27];
 int iwork[30];
 
-//FMIN
+//Параметры FMIN
 double ERROR_FMIN = 0.1;
 int flag_fmin = 1;
 double K1;
 
 
-//Тупо лайн
 char line[] = "--------------------------------------------------\n";
 
 
@@ -71,7 +70,7 @@ void setUpRKF45param() {
 }
 
 
-//Перебор всех K на заданном промежутке
+//Поиск K при помощи fmin, расчет и вывод погрешности
 double calcFun(double k) {
     K = k;
     double sum = 0;
@@ -94,17 +93,17 @@ double calcFun(double k) {
 
 
 int main() {
+    //Расчитываем и выводим значение L
     quanc8(funL, down, up, abserr, relerr, &L, &errest, &nofun, &flag);
-    L = L/ divisorOfL;
+    L = L / divisorOfL;
     printf("L = ");
     printf("%.10f\n", L);
     printf(line);
 
+    //Находим K при помощи fmin
     K = fmin(start, xout, calcFun, ERROR_FMIN, K1, flag_fmin);
-    printf("Answer:\nK = %.2f\n",K);
+    printf("Answer:\nK = %.2f\n", K);
 
-
-    L = L / divisorOfL;
 
     return 0;
 
