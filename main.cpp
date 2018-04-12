@@ -2,8 +2,17 @@
 #include <math.h>
 #include "Calc/lib/rkf45.cpp"
 #include "Calc/lib/quanc8.cpp"
+#include "Calc/lib/fmin.cpp"
+#include "Calc/lib/spline.cpp"
 
 using namespace ::std;
+
+//Исходная таблица
+int start = 36, xout = 46;
+double x[] = {0.0, 0.303, -0.465, 0.592, -0.409, 0.164, 0.180};
+double t[] = {0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4};
+const int nodeDigit = 7;
+
 
 //Параметры курсача
 const double M = 1;//Масса маятника
@@ -13,7 +22,7 @@ const double divisorOfL = 0.90452424;
 double K;//Жесткость пружины
 double y[4];// y[0] = y, y[1] = y', y[2] = z, y[3] = z'
 double dy[4];//Дифференциалы
-//double rightX[] = {0, 0.303, -0.465, 0.592, -0.409, 0.164, 0.180};
+
 
 //Параметры для QUANC8
 const int down = 0, up = 1;
@@ -27,15 +36,14 @@ int iflag = 1, n = 4;
 double work[27];
 int iwork[30];
 
+//FMIN
+double ERROR_FMIN = 0.01;
+int flag_fmin = 1;
+double K1;
+
+
 //Тупо лайн
 char line[] = "--------------------------------------------------\n";
-
-//Параметры узла
-double awaitedX;
-double rightX;
-double rightK;
-double errors;
-double current_tOut = 0;
 
 
 //Подынтегральная функция L
@@ -54,10 +62,9 @@ void fun(double t, double *y, double *dy) {
 
 
 //Установка параметров RKF45
-void setUp() {
+void setUpRKF45param() {
     iflag = 1;
     rBottom = 0;
-    tOut = current_tOut;
     y[0] = 0;
     y[1] = 0;
     y[2] = 0;
@@ -65,36 +72,18 @@ void setUp() {
 }
 
 
-//Установка текущего узла таблцы
-void setUpNode(double sAwaitedX) {
-    rightX = 10;
-    rightK = 0;
-    awaitedX = sAwaitedX;
-
-
-}
-
-
 //Перебор всех K на заданном промежутке
-void callRKF45() {
-    for (K = 36; K < 46; K += 0.01) {
-        setUp();
-        tOut = current_tOut;
+double calcFun(double k) {
+    K = k;
+    double sum = 0;
+    for (int i = 0; i < nodeDigit; ++i) {
+        setUpRKF45param();
+        tOut = t[i];
         RKF45(fun, n, y, &rBottom, &tOut, &re, &ae, &iflag, work, iwork);
-        if (abs(y[0] - awaitedX) < abs(rightX - awaitedX)) {
-            rightX = y[0];
-            rightK = K;
-        }
-        errors = abs(y[0] - awaitedX);
-
-        //printf("%.10f    %f\n", y[0], K);
-
+        sum += pow(y[0] - x[i], 2);
     }
-    printf(line);
-    printf("K = \n");
-    printf("%.10f\n", rightK);
-    printf("X = \n");
-    printf("%.10f\n", rightX);
+
+    return sum;
 
 }
 
@@ -105,54 +94,11 @@ int main() {
     printf("L = ");
     printf("%.10f\n", L);
 
+    K = fmin(start, xout, calcFun, ERROR_FMIN, K1, flag_fmin);
+    printf("K = ");
+    printf("%.2f\n", K);
 
-    current_tOut = 0.0;
-    setUpNode(0.0);
-    callRKF45();
-    printf("errors = \n");
-    printf("%.10f\n", errors);
-
-
-    current_tOut = 0.4;
-    setUpNode(0.303);
-    callRKF45();
-    printf("errors = \n");
-    printf("%.10f\n", errors);
-
-
-    current_tOut = 0.8;
-    setUpNode(-0.465);
-    callRKF45();
-    printf("errors = \n");
-    printf("%.10f\n", errors);
-
-    current_tOut = 1.2;
-    setUpNode(0.592);
-    callRKF45();
-    printf("errors = \n");
-    printf("%.10f\n", errors);
-
-
-    current_tOut = 1.6;
-    setUpNode(-0.409);
-    callRKF45();
-    printf("errors = \n");
-    printf("%.10f\n", errors);
-
-
-    current_tOut = 2.0;
-    setUpNode(0.164);
-    callRKF45();
-    printf("errors = \n");
-    printf("%.10f\n", errors);
-
-
-    current_tOut = 2.4;
-    setUpNode(0.180);
-    callRKF45();
-    printf("errors = \n");
-    printf("%.10f\n", errors);
-
+    L = L / divisorOfL;
 
     return 0;
 
