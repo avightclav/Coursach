@@ -3,7 +3,6 @@
 #include "Calc/lib/rkf45.cpp"
 #include "Calc/lib/quanc8.cpp"
 #include "Calc/lib/fmin.cpp"
-#include "Calc/lib/spline.cpp"
 
 using namespace ::std;
 
@@ -37,7 +36,7 @@ double work[27];
 int iwork[30];
 
 //FMIN
-double ERROR_FMIN = 0.01;
+double ERROR_FMIN = 0.1;
 int flag_fmin = 1;
 double K1;
 
@@ -76,12 +75,18 @@ void setUpRKF45param() {
 double calcFun(double k) {
     K = k;
     double sum = 0;
+    printf("K = %.2f\n", K);
     for (int i = 0; i < nodeDigit; ++i) {
         setUpRKF45param();
         tOut = t[i];
         RKF45(fun, n, y, &rBottom, &tOut, &re, &ae, &iflag, work, iwork);
         sum += pow(y[0] - x[i], 2);
+        printf("tout = %.1f \t ", t[i]);
+        printf("x*  = %.6f \t", x[i]);
+        printf("x[] = %.6f\n", y[0]);
     }
+    printf("errors = %.16f\n", sum);
+    printf(line);
 
     return sum;
 
@@ -90,13 +95,14 @@ double calcFun(double k) {
 
 int main() {
     quanc8(funL, down, up, abserr, relerr, &L, &errest, &nofun, &flag);
-    L = L / divisorOfL;
+    L = L/ divisorOfL;
     printf("L = ");
     printf("%.10f\n", L);
+    printf(line);
 
     K = fmin(start, xout, calcFun, ERROR_FMIN, K1, flag_fmin);
-    printf("K = ");
-    printf("%.2f\n", K);
+    printf("Answer:\nK = %.2f\n",K);
+
 
     L = L / divisorOfL;
 
