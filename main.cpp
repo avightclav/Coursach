@@ -4,35 +4,34 @@
 #include "Calc/lib/quanc8.cpp"
 #include "Calc/lib/fmin.cpp"
 #include "MATRIX.CPP"
-#include "regex.h"
 #include "Calc/ZEROIN.cpp"
 
 #define matrixSize 4
 
 using namespace ::std;
 
-//Исходные параметры
+//РСЃС…РѕРґРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹
 const int K_FROM = 36, K_TO = 46;
 const int nodeDigit = 7;
-double M;//Масса маятника
+double M;//РњР°СЃСЃР° РјР°СЏС‚РЅРёРєР°
 const double g = 9.81;
-double L;//Начальная длина пружины
-double K = 39.24;//Жесткость пружины
+double L;//РќР°С‡Р°Р»СЊРЅР°СЏ РґР»РёРЅР° РїСЂСѓР¶РёРЅС‹
+double K = 39.24;//Р–РµСЃС‚РєРѕСЃС‚СЊ РїСЂСѓР¶РёРЅС‹
 double y[4];// y[0] = y, y[1] = y', y[2] = z, y[3] = z'
-double dy[4];//Дифференциалы
+double dy[4];//Р”РёС„С„РµСЂРµРЅС†РёР°Р»С‹
 double xL = 0.38;
 double xR = 0.40;
 double cond;
 double zeroinEps = 1e-8;
 VECTOR(sourceAnswers, matrixSize);
 
-//Параметры RKF45
+//РџР°СЂР°РјРµС‚СЂС‹ RKF45
 double h = 0.4, rBottom = 0, rUp = 2.4, tOut = 0, re = 1e-8, ae = 1e-8;
 int iflag = 1, n = 4;
 double work[27];
 int iwork[30];
 
-//Параметры FMIN
+//РџР°СЂР°РјРµС‚СЂС‹ FMIN
 double ERROR_FMIN = 0.0001;
 int flag_fmin = 1;
 double K1;
@@ -51,13 +50,13 @@ double L_Function(double L) {
 }
 
 
-//Подынтегральная функция L
+//РџРѕРґС‹РЅС‚РµРіСЂР°Р»СЊРЅР°СЏ С„СѓРЅРєС†РёСЏ L
 void setupL() {
     L = 0.6836896 * (exp(1.0) - exp(0.0));
 }
 
 
-//Приведенная система ДУ
+//РџСЂРёРІРµРґРµРЅРЅР°СЏ СЃРёСЃС‚РµРјР° Р”РЈ
 void DE(double t, double *y, double *dy) {
     dy[0] = y[1];
     dy[1] = -K / M * y[0] - g * (1 - cos(y[2])) + (L + y[0]) * (y[3] * y[3]);
@@ -66,7 +65,7 @@ void DE(double t, double *y, double *dy) {
 }
 
 
-//Установка параметров RKF45
+//РЈСЃС‚Р°РЅРѕРІРєР° РїР°СЂР°РјРµС‚СЂРѕРІ RKF45
 void setUpRKF45param() {
     iflag = 1;
     rBottom = 0;
@@ -133,25 +132,6 @@ int main() {
     quanc8(L_Function, down, up, abserr, relerr, &L, &errest, nofun, &flag);
     printf("\n%f",L);
 
-
-//    double sourceMatrix[4][4] = {
-//            {5, 7, 6, 5},
-//            {7, 10, 8, 7},
-//            {6, 8, 10, 9},
-//            {5, 7, 9, 10}
-//    };
-//
-//    //Расчитываем и выводим значение L
-//    setupL();
-//    printf("L = ");
-//    printf("%.10f\n", L);
-//    printf(line);
-//
-//    //Находим K при помощи fmin
-//    K = fmin(K_FROM, K_TO, calculateFun, ERROR_FMIN, K1, flag_fmin);
-//
-//    printf("Answer:\nK = %.6f\n", K);
-//
     return 0;
 
 }
