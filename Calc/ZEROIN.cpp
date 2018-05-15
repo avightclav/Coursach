@@ -1,7 +1,5 @@
 #include <iostream>
 #include <assert.h>
-#include "SPLINES.H"
-#include "lagrange.h"
 
 using namespace std;
 

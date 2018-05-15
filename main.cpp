@@ -5,6 +5,7 @@
 #include "Calc/lib/fmin.cpp"
 #include "MATRIX.CPP"
 #include "regex.h"
+#include "Calc/ZEROIN.cpp"
 
 #define matrixSize 4
 
@@ -12,16 +13,17 @@ using namespace ::std;
 
 //Исходные параметры
 const int K_FROM = 36, K_TO = 46;
-double x[] = {0.0, 0.303, -0.465, 0.592, -0.409, 0.164, 0.180};
-double t[] = {0, 0.4, 0.8, 1.2, 1.6, 2.0, 2.4};
 const int nodeDigit = 7;
-const double M = 1;//Масса маятника
+double M;//Масса маятника
 const double g = 9.81;
 double L;//Начальная длина пружины
-double K;//Жесткость пружины
+double K = 39.24;//Жесткость пружины
 double y[4];// y[0] = y, y[1] = y', y[2] = z, y[3] = z'
 double dy[4];//Дифференциалы
+double xL = 0.38;
+double xR = 0.40;
 double cond;
+double zeroinEps = 1e-8;
 VECTOR(sourceAnswers, matrixSize);
 
 //Параметры RKF45
@@ -37,6 +39,17 @@ double K1;
 
 
 char line[] = "--------------------------------------------------\n";
+
+const int down = 2, up = 4;
+const double abserr = 1.0e-12, relerr = 0;
+double errest, flag;
+int nofun[1];
+double x;
+
+double L_Function(double L) {
+    return 1 / pow(1 / 3, (x - 1) * (x + 1) * (x + 1)) - 0.65730045;
+}
+
 
 //Подынтегральная функция L
 void setupL() {
@@ -59,29 +72,18 @@ void setUpRKF45param() {
     rBottom = 0;
     y[0] = sourceAnswers[0];
     y[1] = sourceAnswers[1];
-    y[2] = sourceAnswers[2];
-    y[3] = sourceAnswers[3];
+    y[2] = sourceAnswers[3];
+    y[3] = sourceAnswers[2];
 }
 
+double fun(double x) {
+    return log10(3 * x - 1) + exp(2 * x - 1);
+}
 
-//Поиск K при помощи fmin, расчет и вывод погрешности
-double calculateFun(double k) {
-    K = k;
-    double sum = 0;
-    printf("K = %.6f\n", K);
-    for (int i = 0; i < nodeDigit; ++i) {
-        setUpRKF45param();
-        tOut = t[i];
-        RKF45(DE, n, y, &rBottom, &tOut, &re, &ae, &iflag, work, iwork);
-        sum += pow(y[0] - x[i], 2);
-        printf("tout = %.1f \t ", t[i]);
-        printf("x*  = %.6f \t", x[i]);
-        printf("x[] = %.6f\n", y[0]);
-    }
-    printf("errors = %.16f\n", sum);
-    printf("%s", line);
-    return sum;
-
+void setupM() {
+    const double Z = ZEROIN(fun, xL, xR, zeroinEps);
+    printf("\n %f", Z);
+    M = 2.587103 * Z;
 }
 
 
@@ -121,9 +123,15 @@ int main() {
     setUpRKF45param();
 
     for (int i = 0; i < matrixSize; i++) {
-        printf("%f \n", sourceAnswers[i]);
+        printf("%f\n", sourceAnswers[i]);
     }
 
+    setupM();
+    printf("\n%f", M);
+
+    double L;
+    quanc8(L_Function, down, up, abserr, relerr, &L, &errest, nofun, &flag);
+    printf("\n%f",L);
 
 
 //    double sourceMatrix[4][4] = {
@@ -144,6 +152,6 @@ int main() {
 //
 //    printf("Answer:\nK = %.6f\n", K);
 //
-   return 0;
+    return 0;
 
 }
